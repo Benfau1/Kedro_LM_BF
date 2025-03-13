@@ -4,28 +4,26 @@
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
 raw_data:
-  type: pandas.CSVDataSet
-  path: data/tonal_exams.csv
+  type: pandas.CSVDataset
+  filepath: data/tonal_exams.csv
 generated_csv:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/tonal_exams.csv
 cleaned_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/cleaned_data.csv
 train_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/trained_data.csv
 train_labels:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/train_labels.csv
 test_data:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/test_data.csv
 test_labels:
-  type: pandas.CSVDataSet
+  type: pandas.CSVDataset
   filepath: data/test_labels.csv
 ml_model:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/model.h5
-  save_args:
-  overwrite: true

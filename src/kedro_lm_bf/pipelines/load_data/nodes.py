@@ -1,15 +1,14 @@
+from kedro.pipeline import node
 import pandas as pd
-from data.audiogram_generator import run_generation
-def generate_audiogram_data():
+
+def generate_audiogram_data(data: pd.DataFrame):
     """Exécute le script de génération d'audiogrammes."""
-    csv_filename = "data/tonal_exams.csv"  
-    exam_count = 100000  
-    run_generation(exam_count, csv_filename)
-    return csv_filename 
+    print(data)
+    return data 
 
 
 
-def clean_data(data: pd.DataFrame) -> pd.DataFrame:
+def clean_data(data: pd.DataFrame):
     """
     Nettoie les données en supprimant les valeurs aberrantes et interpolant les valeurs manquantes.
 
@@ -18,7 +17,7 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
 
     Returns:
         pd.DataFrame: Jeu de données nettoyé.
-    """
+    
 
     # Suppression des valeurs aberrantes
     Q1 = data.quantile(0.15)
@@ -30,3 +29,4 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     data_cleaned = data_cleaned.interpolate(method="linear")
 
     return data_cleaned
+    """
