@@ -28,3 +28,6 @@ attr = "kedro_lm_bf.__version__"
 [tool.setuptools.packages.find]
 where = [ "src",]
 namespaces = false
+
+[tool.kedro_telemetry]
+project_id = "9d4b4ab2643c4401b350529d8ca17eec"
