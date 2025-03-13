@@ -1,10 +1,14 @@
-"""
-This is a boilerplate pipeline 'train_data'
-generated using Kedro 0.19.11
-"""
+from kedro.pipeline import node, Pipeline, pipeline
 
-from kedro.pipeline import node, Pipeline, pipeline  # noqa
+from kedro_lm_bf.pipelines import train_data  # noqa
 
 
 def create_pipeline(**kwargs) -> Pipeline:
-    return pipeline([])
+    return pipeline([
+        node(
+                func=train_data,
+                inputs="train_data",
+                outputs="cleaned_data",
+                name="data_cleaning_node",
+            ),
+    ])
