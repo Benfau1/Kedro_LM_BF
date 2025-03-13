@@ -6,6 +6,9 @@
 raw_data:
   type: pandas.CSVDataSet
   path: data/tonal_exams.csv
+generated_csv:
+  type: pandas.CSVDataSet
+  filepath: data/tonal_exams.csv
 cleaned_data:
   type: pandas.CSVDataSet
   filepath: data/cleaned_data.csv
