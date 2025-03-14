@@ -1,20 +1,26 @@
 import tensorflow as tf
 from keras import layers, regularizers
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
-def train_test_split(transformed_data):
+def split_train_test(transformed_data):
     # Nettoyer les données : conversion en numérique et suppression des valeurs non valides
     transformed_data = transformed_data.apply(pd.to_numeric, errors='coerce')
     transformed_data = transformed_data.dropna()
 
     # Séparer les données en train et test (80% / 20%)
     train_data, test_data = train_test_split(transformed_data, test_size=0.2, random_state=42)
-    return train_data, test_data
 
-def create_model(train_data, units=128, activation='relu', l2_value=0.01, dropout_rate=None, learning_rate=1e-3):
+    # Nombre de fréquences / 1
+    before_columns_count = len([col for col in transformed_data.columns if col.startswith("before")])
+    shaped_data = pd.DataFrame([[before_columns_count, 1]], columns=["before_columns_count", "constant"])
 
+    return train_data, test_data, shaped_data
+
+def create_model(shaped_data:pd.DataFrame, units=128, activation='relu', l2_value=0.01, dropout_rate=None, learning_rate=1e-3):
     # Définition de la couche d'entrée
-    inputs = layers.Input(shape=train_data) # format (dim,1)
+    inputs = layers.Input(shape=shaped_data) # format (dim,1)
+    # ML flow avant train
 
     # Définition des couches de convolution
     x = layers.Conv1D(filters=32, kernel_size=3, activation=activation)(inputs)
@@ -33,7 +39,7 @@ def create_model(train_data, units=128, activation='relu', l2_value=0.01, dropou
     if dropout_rate is not None:
         x = layers.Dropout(dropout_rate)(x)
 
-    x = layers.Dense(train_data[0], activation='softmax')(x)
+    x = layers.Dense(shaped_data[0], activation='softmax')(x)
 
     # Création du modèle
     model = tf.keras.Model(inputs=inputs, outputs=x)

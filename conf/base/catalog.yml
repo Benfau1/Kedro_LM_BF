@@ -3,7 +3,7 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
- 
+
 generated_csv:
   type: pandas.CSVDataset
   filepath: data/tonal_exams.csv
@@ -15,19 +15,23 @@ cleaned_data_final:
   filepath: data/cleaned_data_final.csv
 transformed_data:
   type: pandas.CSVDataset
-  filepath: data/trained_data.csv
+  filepath: data/csv/tonal_exams.csv
 train_data:
   type: pandas.CSVDataset
-  filepath: data/trained_data.csv
+  filepath: data/csv/trained_data.csv
 train_labels:
   type: pandas.CSVDataset
-  filepath: data/train_labels.csv
+  filepath: data/csv/train_labels.csv
 test_data:
   type: pandas.CSVDataset
-  filepath: data/test_data.csv
+  filepath: data/csv/test_data.csv
 test_labels:
   type: pandas.CSVDataset
-  filepath: data/test_labels.csv
+  filepath: data/csv/test_labels.csv
+shaped_data:
+  type: pandas.CSVDataset
+  filepath: data/csv/shaped_data.csv
 ml_model:
   type: tensorflow.TensorFlowModelDataset
-  filepath: data/model.h5
+  filepath: data/model/model.h5
+

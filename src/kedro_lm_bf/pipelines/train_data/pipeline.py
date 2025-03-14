@@ -1,20 +1,20 @@
 from kedro.pipeline import node, Pipeline, pipeline
 
-from .nodes import create_model, train_test_split  # noqa
+from .nodes import create_model, split_train_test  # noqa
 
 
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([
         node(
-                func=train_test_split,
+                func=split_train_test,
                 inputs="transformed_data",
-                outputs=["train_data", "test_data"],
+                outputs=["train_data", "test_data","shaped_data"],
                 name="train_test_split",
             ),
         node(
                 func=create_model,
-                inputs="train_data",
-                outputs="cleaned_data",
+                inputs="shaped_data",
+                outputs="ml_model",
                 name="create_model",
             ),
     ])
