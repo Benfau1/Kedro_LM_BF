@@ -3,7 +3,9 @@ from keras import layers, regularizers
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, f1_score, accuracy_score
+import mlflow
 
+mlflow.autolog()
 
 def split_train_test(transformed_data):
      # Identifier les colonnes à prédire (celles commençant par 'after')
