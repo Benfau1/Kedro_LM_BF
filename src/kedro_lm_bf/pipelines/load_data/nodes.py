@@ -6,87 +6,87 @@ import os
 
 def generate_audiogram_data() -> pd.DataFrame:
     """Génère les audiogrammes et retourne un DataFrame."""
-    output_file = "data/tonal_exams.csv"
-
-    if os.path.exists(output_file):
-        os.remove(output_file)
+    output_file = "tonal_exams.csv"
 
     df = run_generation(10000, output_file)  # Nombre d'audiogrammes à générer
 
     return df  # On retourne le DataFrame pour Kedro
 
-
-   
-
 def replace_alphanumeric_values(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Remplace les valeurs alphanumériques (lettres) par une interpolation linéaire
-    basée sur les valeurs before ou after.
-
+    Remplace les valeurs non numériques (NaN, lettres) et les valeurs flottantes par 
+    une interpolation linéaire basée sur les valeurs numériques voisines, en séparant
+    les groupes "before" et "after".
+    
     Args:
         data (pd.DataFrame): Jeu de données brut.
-
+    
     Returns:
-        pd.DataFrame: Jeu de données sans valeurs alphanumériques.
+        pd.DataFrame: Jeu de données nettoyé avec interpolation linéaire.
     """
-    output_file = "data/intermediate_cleaned_datas.csv"
-    if os.path.exists(output_file):
-        os.remove(output_file)
-
     data_cleaned = data.copy()
-    
-    for col in data.columns:
-        for i in range(1, len(data) - 1):
-            curr_val = data[col].iloc[i]
-            prev_val = data[col].iloc[i - 1]
-            next_val = data[col].iloc[i + 1]
-            
-            # Vérifier si la valeur actuelle est une lettre
-            if isinstance(curr_val, str) and not curr_val.isdigit():
-                numeric_neighbors = []
-                
-                # Ajouter les valeurs voisines si elles sont numériques
-                if isinstance(prev_val, (int, float)) and not pd.isna(prev_val):
-                    numeric_neighbors.append(prev_val)
-                if isinstance(next_val, (int, float)) and not pd.isna(next_val):
-                    numeric_neighbors.append(next_val)
-                
-                # Si on a trouvé des voisins numériques, on remplace par leur moyenne
-                if numeric_neighbors:
-                    data_cleaned.at[i, col] = sum(numeric_neighbors) / len(numeric_neighbors)
-                else:
-                    data_cleaned.at[i, col] = np.nan  # Laisser NaN si aucun voisin n'est numérique
-    
-    # 🔥 Convertir toutes les colonnes en nombres après remplacement des valeurs
-    data_cleaned = data_cleaned.apply(pd.to_numeric, errors='coerce')
-    
-    return data_cleaned
+
+    # Séparer les groupes "before" et "after"
+    before_cols = [col for col in data_cleaned.columns if "before" in col]
+    after_cols = [col for col in data_cleaned.columns if "after" in col]
+
+    def interpolate_group(df):
+        df = df.apply(pd.to_numeric, errors='coerce')
+        df.interpolate(method="linear", axis=1, inplace=True, limit_direction="both")
+        return df.round().astype(pd.Int64Dtype())  # Conversion en entier avec gestion des NaN
+
+    # Traitement séparé des groupes
+    before_cleaned = interpolate_group(data_cleaned[before_cols])
+    after_cleaned = interpolate_group(data_cleaned[after_cols])
+
+    # Concaténation des groupes pour reconstituer le DataFrame final
+    cleaned_data = pd.concat([before_cleaned, after_cleaned], axis=1)
+
+    return cleaned_data
 
 
 def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     """
-    Nettoie les données en supprimant les valeurs aberrantes et interpolant les valeurs manquantes.
-
-    Args:
-        data (pd.DataFrame): Jeu de données brut.
-
-    Returns:
-        pd.DataFrame: Jeu de données nettoyé.
+    Nettoie les données en remplaçant les valeurs aberrantes par une interpolation linéaire par ligne,
+    tout en distinguant les groupes "before" et "after".
     """
 
-    output_file = "data/cleaned_data_final.csv"
-    if os.path.exists(output_file):
-        os.remove(output_file)
-
-    # 🔥 Assurer que toutes les valeurs sont bien des nombres
     data = data.apply(pd.to_numeric, errors='coerce')
 
-    # Suppression des valeurs aberrantes
-    Q1 = data.quantile(0.15)
-    Q3 = data.quantile(0.85)
-    IQR = Q3 - Q1
-    data_cleaned = data[~((data < (Q1 - 1.5 * IQR)) | (data > (Q3 + 1.5 * IQR))).any(axis=1)]
+    # Identifier les colonnes "before" et "after"
+    mid_index = data.shape[1] // 2
+    before_cols = data.columns[:mid_index]
+    after_cols = data.columns[mid_index:]
 
-    # Interpolation des valeurs manquantes
-    data_cleaned = data_cleaned.interpolate(method="linear").fillna(0).round().astype(int)
-    return data_cleaned
+    def clean_group(df):
+        """Nettoyage d'un sous-groupe de colonnes."""
+        df = df.copy()
+        
+        # Détection des valeurs aberrantes
+        Q1 = df.quantile(0.10, axis=1)
+        Q3 = df.quantile(0.90, axis=1)
+        IQR = Q3 - Q1
+        outliers_mask = (df.T < (Q1 - 1.5 * IQR)).T | (df.T > (Q3 + 1.5 * IQR)).T
+
+        # Remplacement des valeurs aberrantes par NaN
+        df_cleaned = df.mask(outliers_mask, np.nan)
+
+        # Interpolation linéaire **ligne par ligne**
+        df_cleaned = df_cleaned.interpolate(method="linear", axis=1, limit_direction="both")
+
+        return df_cleaned
+
+    # Nettoyage séparé des groupes
+    before_cleaned = clean_group(data[before_cols])
+    after_cleaned = clean_group(data[after_cols])
+
+    # Assurer l'alignement des colonnes avant la concaténation
+    before_cleaned, after_cleaned = before_cleaned.align(after_cleaned, axis=0, copy=False)
+
+    # Concaténation des résultats
+    data_final = pd.concat([before_cleaned, after_cleaned], axis=1)
+
+    # Arrondi et conversion en int après interpolation
+    data_final = data_final.round().astype(pd.Int64Dtype())
+
+    return data_final

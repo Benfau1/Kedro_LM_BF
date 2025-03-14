@@ -81,7 +81,7 @@ def add_realism_to_data(csv_filename: str) -> None:
 
     # Déterminer le nombre de modifications à apporter
     num_rows, num_cols = df.shape
-    num_changes = random.randint(int(np.round(num_rows*0.3)), num_rows)  # Nombre aléatoire de lignes à modifier
+    num_changes = random.randint(int(np.round(num_rows * 0.3)), num_rows)
 
     for _ in range(num_changes):
         row_index = random.randint(0, num_rows - 1)  # Sélectionner une ligne aléatoire
@@ -120,7 +120,7 @@ def run_generation(exam_count: int, csv_filename: str) -> pd.DataFrame:
     print(f'Audiogrammes générés et sauvegardés dans "{csv_filename}".')
     print(f'Temps total d’exécution : {round(end-start, 3)} secondes.')
 
-    return df  # 🔥 On retourne le DataFrame !
+    return df 
 
 
 if __name__ == "__main__":
