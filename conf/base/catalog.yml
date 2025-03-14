@@ -3,15 +3,16 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
-raw_data:
-  type: pandas.CSVDataset
-  filepath: data/tonal_exams.csv
+ 
 generated_csv:
   type: pandas.CSVDataset
   filepath: data/tonal_exams.csv
-cleaned_data:
+intermediate_cleaned_data:
   type: pandas.CSVDataset
-  filepath: data/cleaned_data.csv
+  filepath: data/intermediate_cleaned_data.csv
+cleaned_data_final:
+  type: pandas.CSVDataset
+  filepath: data/cleaned_data_final.csv
 transformed_data:
   type: pandas.CSVDataset
   filepath: data/trained_data.csv

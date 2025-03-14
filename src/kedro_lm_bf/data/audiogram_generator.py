@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import time
 import random
+import os
+
 
 
 def generate_thresholds_by_profile(profile, frequencies):
@@ -79,7 +81,7 @@ def add_realism_to_data(csv_filename: str) -> None:
 
     # Déterminer le nombre de modifications à apporter
     num_rows, num_cols = df.shape
-    num_changes = random.randint(np.round(num_rows*0.3), num_rows)  # Nombre aléatoire de lignes à modifier
+    num_changes = random.randint(int(np.round(num_rows*0.3)), num_rows)  # Nombre aléatoire de lignes à modifier
 
     for _ in range(num_changes):
         row_index = random.randint(0, num_rows - 1)  # Sélectionner une ligne aléatoire
@@ -101,16 +103,24 @@ def add_realism_to_data(csv_filename: str) -> None:
     # Sauvegarder le DataFrame modifié dans le fichier CSV
     df.to_csv(csv_filename, index=False)
 
-def run_generation(exam_count: int, csv_filename: str) -> None:
-    """Exécute la génération des audiogrammes et l'ajout de bruit."""
+def run_generation(exam_count: int, csv_filename: str) -> pd.DataFrame:
+    """Exécute la génération des audiogrammes et l'ajout de bruit, puis retourne le DataFrame."""
     start = time.time()
-    
+
+    if os.path.exists(csv_filename):
+        os.remove(csv_filename)
+
     generate_audiograms_with_profiled_improvement(exam_count, csv_filename)
     add_realism_to_data(csv_filename)
     
+    # Charger le fichier CSV et le retourner sous forme de DataFrame
+    df = pd.read_csv(csv_filename)
+
     end = time.time()
     print(f'Audiogrammes générés et sauvegardés dans "{csv_filename}".')
     print(f'Temps total d’exécution : {round(end-start, 3)} secondes.')
+
+    return df  # 🔥 On retourne le DataFrame !
 
 
 if __name__ == "__main__":
