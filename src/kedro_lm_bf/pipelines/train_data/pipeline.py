@@ -7,7 +7,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([
         node(
                 func=split_train_test,
-                inputs="transformed_data",
+                inputs="cleaned_data_final",
                 outputs=["train_data", "test_data","shaped_data"],
                 name="train_test_split",
             ),

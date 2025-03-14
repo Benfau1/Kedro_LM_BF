@@ -13,13 +13,14 @@ def split_train_test(transformed_data):
 
     # Nombre de fréquences / 1
     before_columns_count = len([col for col in transformed_data.columns if col.startswith("before")])
-    shaped_data = pd.DataFrame([[before_columns_count, 1]], columns=["before_columns_count", "constant"])
+    shaped_data = pd.DataFrame([], columns=[before_columns_count,1])
 
     return train_data, test_data, shaped_data
 
-def create_model(shaped_data:pd.DataFrame, units=128, activation='relu', l2_value=0.01, dropout_rate=None, learning_rate=1e-3):
+def create_model(input_shape, units=128, activation='relu', l2_value=0.01, dropout_rate=None, learning_rate=1e-3):
+    input_shape=(7,1)
     # Définition de la couche d'entrée
-    inputs = layers.Input(shape=shaped_data) # format (dim,1)
+    inputs = layers.Input(shape=input_shape) # format (dim,1)
     # ML flow avant train
 
     # Définition des couches de convolution
@@ -39,7 +40,7 @@ def create_model(shaped_data:pd.DataFrame, units=128, activation='relu', l2_valu
     if dropout_rate is not None:
         x = layers.Dropout(dropout_rate)(x)
 
-    x = layers.Dense(shaped_data[0], activation='softmax')(x)
+    x = layers.Dense(input_shape[0], activation='softmax')(x)
 
     # Création du modèle
     model = tf.keras.Model(inputs=inputs, outputs=x)

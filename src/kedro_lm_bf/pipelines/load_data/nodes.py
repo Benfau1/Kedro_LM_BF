@@ -6,7 +6,7 @@ import os
 
 def generate_audiogram_data() -> pd.DataFrame:
     """Génère les audiogrammes et retourne un DataFrame."""
-    output_file = "tonal_exams.csv"
+    output_file = "data/tonal_exams.csv"
 
     df = run_generation(10000, output_file)  # Nombre d'audiogrammes à générer
 
