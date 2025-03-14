@@ -22,22 +22,25 @@ cleaned_data_final:
   fs_args:
     open_args_write:
       mode: "w"
-train_data:
-  type: pandas.CSVDataset
-  filepath: data/trained_data.csv
-train_labels:
-  type: pandas.CSVDataset
-  filepath: data/train_labels.csv
-test_data:
-  type: pandas.CSVDataset
-  filepath: data/test_data.csv
-test_labels:
-  type: pandas.CSVDataset
-  filepath: data/test_labels.csv
 shaped_data:
   type: pandas.CSVDataset
   filepath: data/shaped_data.csv
-ml_model:
+X_train:
+  type: pandas.CSVDataset
+  filepath: data/trained_data.csv
+y_train:
+  type: pandas.CSVDataset
+  filepath: data/train_labels.csv
+X_test:
+  type: pandas.CSVDataset
+  filepath: data/test_data.csv
+y_test:
+  type: pandas.CSVDataset
+  filepath: data/test_labels.csv
+model:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/model.h5
+trained_model:
+  type: tensorflow.TensorFlowModelDataset
+  filepath: data/trained_model.h5
 

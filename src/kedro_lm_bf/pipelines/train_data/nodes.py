@@ -4,18 +4,22 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 def split_train_test(transformed_data):
-    # Nettoyer les données : conversion en numérique et suppression des valeurs non valides
-    transformed_data = transformed_data.apply(pd.to_numeric, errors='coerce')
-    transformed_data = transformed_data.dropna()
+     # Identifier les colonnes à prédire (celles commençant par 'after')
+    target_columns = [col for col in transformed_data.columns if col.startswith("after")]
+    feature_columns = [col for col in transformed_data.columns if col not in target_columns]
+
+    # Séparer les features (X) et les labels (y)
+    X = transformed_data[feature_columns]
+    y = transformed_data[target_columns]
 
     # Séparer les données en train et test (80% / 20%)
-    train_data, test_data = train_test_split(transformed_data, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Nombre de fréquences / 1
     before_columns_count = len([col for col in transformed_data.columns if col.startswith("before")])
     shaped_data = pd.DataFrame([], columns=[before_columns_count,1])
 
-    return train_data, test_data, shaped_data
+    return X_train, X_test, y_train, y_test, shaped_data
 
 def create_model(input_shape, units=128, activation='relu', l2_value=0.01, dropout_rate=None, learning_rate=1e-3):
     input_shape=(7,1)
@@ -48,3 +52,10 @@ def create_model(input_shape, units=128, activation='relu', l2_value=0.01, dropo
               loss="mse", metrics=[tf.keras.metrics.CategoricalAccuracy()])
     
     return model
+
+def train_model(ml_model,X_train, X_test, y_train, y_test,epochs=10, batch_size=32,learning_rate=1e-3):
+    # Entraîner le modèle
+    ml_model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_test, y_test))
+    ml_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+              loss="mse", metrics=[tf.keras.metrics.CategoricalAccuracy()])
+    return ml_model

@@ -1,6 +1,6 @@
 from kedro.pipeline import node, Pipeline, pipeline
 
-from .nodes import create_model, split_train_test  # noqa
+from .nodes import create_model, split_train_test, train_model  # noqa
 
 
 def create_pipeline(**kwargs) -> Pipeline:
@@ -8,13 +8,19 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
                 func=split_train_test,
                 inputs="cleaned_data_final",
-                outputs=["train_data", "test_data","shaped_data"],
+                outputs=["X_train", "X_test", "y_train", "y_test","shaped_data"],
                 name="train_test_split",
             ),
         node(
                 func=create_model,
                 inputs="shaped_data",
-                outputs="ml_model",
+                outputs="model",
                 name="create_model",
+            ),
+        node(
+                func=train_model,
+                inputs=["model","X_train", "X_test", "y_train", "y_test"],
+                outputs="trained_model",
+                name="train_model",
             ),
     ])
