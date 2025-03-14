@@ -2,6 +2,8 @@ import tensorflow as tf
 from keras import layers, regularizers
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, f1_score, accuracy_score
+
 
 def split_train_test(transformed_data):
      # Identifier les colonnes à prédire (celles commençant par 'after')
@@ -59,3 +61,34 @@ def train_model(ml_model,X_train, X_test, y_train, y_test,epochs=10, batch_size=
     ml_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
               loss="mse", metrics=[tf.keras.metrics.CategoricalAccuracy()])
     return ml_model
+
+def compute_metrics(trained_model, X_test, y_test):
+    # Prédictions sur les données de test
+    y_pred = trained_model.predict(X_test)
+    
+    # Calcul des métriques
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    
+    # Pour accuracy et F1-score, tu dois t'assurer que y_test et y_pred sont des classes (non des valeurs continues)
+    # Si tu as un problème de classification, tu peux utiliser accuracy_score et f1_score
+    if len(y_test.shape) == 2:  # Cas de classification
+        y_test_classes = tf.argmax(y_test, axis=1).numpy()
+        y_pred_classes = tf.argmax(y_pred, axis=1).numpy()
+        accuracy = accuracy_score(y_test_classes, y_pred_classes)
+        f1 = f1_score(y_test_classes, y_pred_classes, average='weighted')
+    else:  # Cas de régression, on n'a pas d'accuracy ou de F1-score
+        accuracy = None
+        f1 = None
+    
+    # Stocker les résultats dans un DataFrame
+    metrics = {
+        "MSE": mse,
+        "MAE": mae,
+        "R2": r2,
+        "Accuracy": accuracy,
+        "F1-score": f1
+    }
+
+    return pd.DataFrame(metrics, index=[0])

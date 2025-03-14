@@ -43,4 +43,7 @@ model:
 trained_model:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/trained_model.h5
+metrics:
+  type: pandas.CSVDataset
+  filepath: data/metrics.csv
 
