@@ -2,7 +2,7 @@ import tensorflow as tf
 from keras import layers, regularizers
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, f1_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score
 import mlflow
 
 mlflow.autolog()
@@ -68,11 +68,6 @@ def compute_metrics(trained_model, X_test, y_test):
     # Prédictions sur les données de test
     y_pred = trained_model.predict(X_test)
     
-    # Calcul des métriques
-    mse = mean_squared_error(y_test, y_pred)
-    mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    
     # Pour accuracy et F1-score, tu dois t'assurer que y_test et y_pred sont des classes (non des valeurs continues)
     # Si tu as un problème de classification, tu peux utiliser accuracy_score et f1_score
     if len(y_test.shape) == 2:  # Cas de classification
@@ -86,9 +81,6 @@ def compute_metrics(trained_model, X_test, y_test):
     
     # Stocker les résultats dans un DataFrame
     metrics = {
-        "MSE": mse,
-        "MAE": mae,
-        "R2": r2,
         "Accuracy": accuracy,
         "F1-score": f1
     }
