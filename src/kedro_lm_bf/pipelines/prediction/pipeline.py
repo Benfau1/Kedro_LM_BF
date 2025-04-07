@@ -1,13 +1,12 @@
-"""
-This is a boilerplate pipeline 'prediction'
-generated using Kedro 0.19.11
-"""
-
 from kedro.pipeline import node, Pipeline, pipeline
-
-from kedro_lm_bf.pipelines.prediction.nodes import predict  # noqa
-
+from .nodes import predict
 
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([
+        node(
+            func=predict,
+            inputs=["x_val", "y_val", "trained_model"],
+            outputs="predictions",
+            name="predict_node",
+        ),
     ])

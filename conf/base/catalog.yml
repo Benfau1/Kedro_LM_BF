@@ -55,3 +55,6 @@ metrics:
 data_to_predict:
   type: pandas.CSVDataset
   filepath: data/data_to_predict.csv
+predictions:
+  type: pandas.CSVDataset
+  filepath: data/predictions.csv
