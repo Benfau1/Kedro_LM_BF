@@ -8,6 +8,21 @@ import mlflow
 
 mlflow.autolog()
 
+def min_max_normalize(df):
+    """
+    Normalise chaque colonne avec la formule (x - min) / (max - min)
+    """
+    df_norm = df.copy()
+    for col in df.columns:
+        A = df[col].min()
+        B = df[col].max()
+        if B != A:
+            df_norm[col] = (df[col] - A) / (B - A)
+        else:
+            df_norm[col] = 0.0  # éviter division par zéro
+    return df_norm
+
+
 def split_train_test(transformed_data):
     # Identifier les colonnes à prédire (celles commençant par 'after')
     target_columns = [col for col in transformed_data.columns if col.startswith("after")]
@@ -17,13 +32,13 @@ def split_train_test(transformed_data):
     X = transformed_data[feature_columns]
     y = transformed_data[target_columns]
 
-    # Première séparation: Train (80%) / Test (20%)
-    X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # 🔹 Normalisation des features uniquement
+    X = min_max_normalize(X)
 
-    # Deuxième séparation: Validation (5% du total) => 5/80 = 6.25% du train temporaire
+    # Split Train / Test / Val
+    X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.125, random_state=42)
 
-    # Info sur les dimensions d’entrée
     before_columns_count = len([col for col in transformed_data.columns if col.startswith("before")])
     shaped_data = pd.DataFrame([], columns=[before_columns_count, 1])
 
@@ -75,12 +90,21 @@ def create_model(input_shape,
 
     return model
 
-def train_model(ml_model,X_train, X_test, y_train, y_test,epochs=10, batch_size=32,learning_rate=1e-3):
-    # Entraîner le modèle
-    ml_model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(X_test, y_test))
+def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=50, batch_size=32, learning_rate=1e-3):
+    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+    reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3)
+
     ml_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-              loss="mse", metrics=[tf.keras.metrics.CategoricalAccuracy()])
+                     loss="mse", metrics=["mae"])
+
+    ml_model.fit(X_train, y_train,
+                 epochs=epochs,
+                 batch_size=batch_size,
+                 validation_data=(X_val, y_val),
+                 callbacks=[early_stop, reduce_lr])
+    
     return ml_model
+
 
 def compute_metrics(trained_model, X_test, y_test):
     # Prédictions sur les données de test

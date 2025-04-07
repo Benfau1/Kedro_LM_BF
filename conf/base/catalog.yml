@@ -58,3 +58,6 @@ data_to_predict:
 predictions:
   type: pandas.CSVDataset
   filepath: data/predictions.csv
+test:
+  type: pandas.CSVDataset
+  filepath: data/test.csv
