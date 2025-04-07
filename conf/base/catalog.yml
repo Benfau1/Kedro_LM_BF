@@ -31,6 +31,12 @@ X_train:
 y_train:
   type: pandas.CSVDataset
   filepath: data/train_labels.csv
+x_val:
+  type: pandas.CSVDataset
+  filepath: data/x_val.csv
+y_val:
+  type: pandas.CSVDataset
+  filepath: data/y_val.csv
 X_test:
   type: pandas.CSVDataset
   filepath: data/test_data.csv
@@ -48,4 +54,4 @@ metrics:
   filepath: data/metrics.csv
 data_to_predict:
   type: pandas.CSVDataset
-  filepath: data/data_to_predict.csv  
+  filepath: data/data_to_predict.csv

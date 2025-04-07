@@ -8,12 +8,12 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
                 func=split_train_test,
                 inputs="cleaned_data_final",
-                outputs=["X_train", "X_test", "y_train", "y_test","shaped_data"],
+                outputs=["X_train", "x_val", "X_test", "y_train", "y_val", "y_test","shaped_data"],
                 name="train_test_split",
             ),
         node(
                 func=create_model,
-                inputs="shaped_data",
+                inputs=["shaped_data","y_train"],
                 outputs="model",
                 name="create_model",
             ),

@@ -1,14 +1,15 @@
+import numpy as np
 import tensorflow as tf
 from keras import layers, regularizers
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score, mean_absolute_error, mean_squared_error
 import mlflow
 
 mlflow.autolog()
 
 def split_train_test(transformed_data):
-     # Identifier les colonnes à prédire (celles commençant par 'after')
+    # Identifier les colonnes à prédire (celles commençant par 'after')
     target_columns = [col for col in transformed_data.columns if col.startswith("after")]
     feature_columns = [col for col in transformed_data.columns if col not in target_columns]
 
@@ -16,45 +17,62 @@ def split_train_test(transformed_data):
     X = transformed_data[feature_columns]
     y = transformed_data[target_columns]
 
-    # Séparer les données en train et test (80% / 20%)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Première séparation: Train (80%) / Test (20%)
+    X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Nombre de fréquences / 1
+    # Deuxième séparation: Validation (5% du total) => 5/80 = 6.25% du train temporaire
+    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.125, random_state=42)
+
+    # Info sur les dimensions d’entrée
     before_columns_count = len([col for col in transformed_data.columns if col.startswith("before")])
-    shaped_data = pd.DataFrame([], columns=[before_columns_count,1])
+    shaped_data = pd.DataFrame([], columns=[before_columns_count, 1])
 
-    return X_train, X_test, y_train, y_test, shaped_data
+    return X_train, X_val, X_test, y_train, y_val, y_test, shaped_data
 
-def create_model(input_shape, units=128, activation='relu', l2_value=0.01, dropout_rate=None, learning_rate=1e-3):
-    input_shape=(7,1)
-    # Définition de la couche d'entrée
-    inputs = layers.Input(shape=input_shape) # format (dim,1)
-    # ML flow avant train
 
-    # Définition des couches de convolution
-    x = layers.Conv1D(filters=32, kernel_size=3, activation=activation)(inputs)
+def create_model(input_shape, 
+                 output_shape, 
+                 task_type='regression',  # 'classification' ou 'regression'
+                 units=256, 
+                 activation='relu', 
+                 l2_value=1e-4, 
+                 dropout_rate=0.3, 
+                 learning_rate=1e-3):
+
+    inputs = layers.Input(shape=(7, 1))
+
+    # Bloc convolution
+    x = layers.Conv1D(64, kernel_size=3, padding='same', activation=activation)(inputs)
+    x = layers.BatchNormalization()(x)
     x = layers.MaxPooling1D(pool_size=2)(x)
-    x = layers.ZeroPadding1D(padding=1)(x)  # Ajouter une couche de padding
-    x = layers.Conv1D(filters=64, kernel_size=3, activation=activation)(x)
-    x = layers.ZeroPadding1D(padding=1)(x)  # Ajouter une couche de padding
+
+    x = layers.Conv1D(128, kernel_size=3, padding='same', activation=activation)(x)
+    x = layers.BatchNormalization()(x)
     x = layers.MaxPooling1D(pool_size=2)(x)
 
-    # Aplatir les données
-    x = layers.Flatten()(x)
+    # Global pooling au lieu de Flatten
+    x = layers.GlobalAveragePooling1D()(x)
 
-    # Définition des couches entièrement connectées
-    x = layers.Dense(units, activation='relu', kernel_regularizer=regularizers.l2(l2_value))(x)
-    
-    if dropout_rate is not None:
-        x = layers.Dropout(dropout_rate)(x)
+    # Dense + régularisation + dropout
+    x = layers.Dense(units, activation=activation, kernel_regularizer=regularizers.l2(l2_value))(x)
+    x = layers.Dropout(dropout_rate)(x)
 
-    x = layers.Dense(input_shape[0], activation='softmax')(x)
+    # Sortie
+    if task_type == 'classification':
+        output_activation = 'softmax'
+        loss = 'categorical_crossentropy'
+        metrics = ['accuracy']
+    else:  # regression
+        output_activation = 'linear'
+        loss = 'mse'
+        metrics = ['mae']
 
-    # Création du modèle
-    model = tf.keras.Model(inputs=inputs, outputs=x)
+    outputs = layers.Dense(output_shape.shape[1], activation=output_activation)(x)
+
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-              loss="mse", metrics=[tf.keras.metrics.CategoricalAccuracy()])
-    
+                  loss=loss, metrics=metrics)
+
     return model
 
 def train_model(ml_model,X_train, X_test, y_train, y_test,epochs=10, batch_size=32,learning_rate=1e-3):
@@ -75,14 +93,19 @@ def compute_metrics(trained_model, X_test, y_test):
         y_pred_classes = tf.argmax(y_pred, axis=1).numpy()
         accuracy = accuracy_score(y_test_classes, y_pred_classes)
         f1 = f1_score(y_test_classes, y_pred_classes, average='weighted')
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     else:  # Cas de régression, on n'a pas d'accuracy ou de F1-score
         accuracy = None
         f1 = None
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     
-    # Stocker les résultats dans un DataFrame
     metrics = {
         "Accuracy": accuracy,
-        "F1-score": f1
+        "F1-score": f1,
+        "MAE": mae,
+        "RMSE": rmse
     }
 
     return pd.DataFrame(metrics, index=[0])
