@@ -13,14 +13,16 @@ def min_max_normalize(df):
     Normalise chaque colonne avec la formule (x - min) / (max - min)
     """
     df_norm = df.copy()
+    min_vals = df.min()
+    max_vals = df.max()
     for col in df.columns:
-        A = df[col].min()
-        B = df[col].max()
+        A = min_vals[col]
+        B = max_vals[col]
         if B != A:
             df_norm[col] = (df[col] - A) / (B - A)
         else:
             df_norm[col] = 0.0  # éviter division par zéro
-    return df_norm
+    return df_norm, min_vals, max_vals
 
 
 def split_train_test(transformed_data):
@@ -32,18 +34,15 @@ def split_train_test(transformed_data):
     X = transformed_data[feature_columns]
     y = transformed_data[target_columns]
 
-    y_min = y.min()
-    y_max = y.max()
-
     # Normalisation des features uniquement
-    X = min_max_normalize(X)
-    y = min_max_normalize(y)
+    X, X_min, X_max = min_max_normalize(X)
+    y, y_min, y_max = min_max_normalize(y)
 
     # Split Train / Test / Val
     X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.125, random_state=42)
 
-    return X_train, X_val, X_test, y_train, y_val, y_test, y_min, y_max
+    return X_train, X_val, X_test, y_train, y_val, y_test, y_min, y_max, X_min, X_max
 
 
 def create_model(input_shape, 

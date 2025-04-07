@@ -1,41 +1,55 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_absolute_error, r2_score
 
-def predict(x_val: pd.DataFrame, y_val: pd.DataFrame, trained_model, y_min, y_max) -> pd.DataFrame:
+def min_max_normalize_predict(x_val, X_min, X_max):
     """
-    Utilise le modèle entraîné pour prédire sur x_val, calcule le MAE moyen et le score R² moyen
-    sur chaque sortie et le pourcentage d'accuracy (comparaison des étiquettes),
-    puis retourne un DataFrame combinant les valeurs réelles et prédites.
-
-    Args:
-        x_val (pd.DataFrame): Données d'entrée pour la prédiction.
-        y_val (pd.DataFrame): Vraies valeurs (one-hot encoded).
-        trained_model: Modèle entraîné.
-
-    Returns:
-        pd.DataFrame: DataFrame combinant "y_true" et "y_pred" pour chaque sortie.
+    Normalise x_val en utilisant X_min et X_max fournis.
     """
-    # Prédire avec le modèle
-    predictions_norm = trained_model.predict(x_val)
-    # Convertir en array avec forme (1, -1) pour broadcast
-    y_range = (y_max.values - y_min.values).reshape(1, -1)
-    y_min_values = y_min.values.reshape(1, -1)
-
-    predictions = predictions_norm * y_range + y_min_values
+    df_norm = x_val.copy()  # Copie de x_val pour éviter modification directe
     
-    # Calcul du MAE moyen sur toutes les sorties
-    # Ici, on calcule l'erreur absolue sur chaque élément et on en fait la moyenne globale
-    mae_mean = np.mean(np.abs(y_val.values - predictions))
-    print(f"Mean Absolute Error moyen: {mae_mean:.4f}")
-
-    r2_mean = r2_score(y_val.values, predictions)
-    print(f"R² Score moyen: {r2_mean:.4f}")
+    # S'assurer que X_min et X_max ont le même index que x_val
+    X_min = pd.Series(X_min.values, index=x_val.columns)
+    X_max = pd.Series(X_max.values, index=x_val.columns)
     
-    # Construction d'un DataFrame résultat avec les vraies valeurs et les prédictions pour chaque sortie
-    n_outputs = predictions.shape[1] if predictions.ndim == 2 else 1
-    df_y_true = pd.DataFrame(y_val.values, columns=[f"y_true_{i}" for i in range(n_outputs)])
-    df_y_pred = pd.DataFrame(predictions, columns=[f"y_pred_{i}" for i in range(n_outputs)])
-    results_df = pd.concat([df_y_true, df_y_pred], axis=1)
+    for col in x_val.columns:
+        A = X_min[col]  # Valeur min pour la normalisation
+        B = X_max[col]  # Valeur max pour la normalisation
+        if B != A:
+            df_norm[col] = (x_val[col] - A) / (B - A)  # Normalisation
+        else:
+            df_norm[col] = 0.0  # Pour éviter la division par zéro
+    
+    return df_norm
+
+def predict(x_val: pd.DataFrame, trained_model, X_min, X_max) -> pd.DataFrame:
+    """
+    Fonction de prédiction avec normalisation des features de x_val en utilisant X_min et X_max.
+    """
+    # Normalisation de x_val
+    df_norm = min_max_normalize_predict(x_val, X_min, X_max)
+    
+    # Reformater les données pour Conv1D (batch_size, timesteps, features)
+    x_reshaped = df_norm.values.reshape(df_norm.shape[0], df_norm.shape[1], 1)
+    
+    # Prédiction avec le modèle
+    predictions_norm = trained_model.predict(x_reshaped)
+    
+    # Dé-normalisation des prédictions
+    # Utiliser les mêmes X_min et X_max que pour la normalisation (car le modèle prédit les mêmes features)
+    y_range = (X_max.values - X_min.values).reshape(1, -1)
+    y_min_values = X_min.values.reshape(1, -1)
+    
+    # S'assurer que les dimensions sont compatibles
+    if predictions_norm.shape[1] != y_range.shape[1]:
+        # Adaptation en fonction du nombre de sorties du modèle
+        predictions = predictions_norm  # Sans dénormalisation si les dimensions ne correspondent pas
+    else:
+        predictions = predictions_norm * y_range + y_min_values
+    
+    # Construction d'un DataFrame avec les prédictions
+    if predictions.shape[1] == 1:
+        results_df = pd.DataFrame(predictions, columns=["y_pred"])
+    else:
+        results_df = pd.DataFrame(predictions, columns=[f"y_pred_{i}" for i in range(predictions.shape[1])])
     
     return results_df

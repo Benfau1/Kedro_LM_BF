@@ -61,6 +61,20 @@ predictions:
 y_min:
   type: pandas.CSVDataset
   filepath: data/y_min.csv
+  save_args:
+    index: False
 y_max:
   type: pandas.CSVDataset
   filepath: data/y_max.csv
+  save_args:
+    index: False
+X_min:
+  type: pandas.CSVDataset
+  filepath: data/X_min.csv
+  save_args:
+    index: False
+X_max:
+  type: pandas.CSVDataset
+  filepath: data/X_max.csv
+  save_args:
+    index: False
