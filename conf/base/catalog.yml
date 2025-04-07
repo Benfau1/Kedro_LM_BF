@@ -46,4 +46,6 @@ trained_model:
 metrics:
   type: pandas.CSVDataset
   filepath: data/metrics.csv
-
+data_to_predict:
+  type: pandas.CSVDataset
+  filepath: data/data_to_predict.csv  
