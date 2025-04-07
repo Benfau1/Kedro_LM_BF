@@ -78,3 +78,22 @@ X_max:
   filepath: data/X_max.csv
   save_args:
     index: False
+
+# API
+train_api:
+  type: pandas.JSONDataSet
+  filepath: data/train_api.json
+  save_args:
+    orient: records
+    indent: 4
+  load_args:
+    orient: records
+
+predict_api:
+  type: pandas.JSONDataSet
+  filepath: data/predict_api.json
+  save_args:
+    orient: records
+    indent: 4
+  load_args:
+    orient: records
