@@ -63,8 +63,8 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
         df = df.copy()
         
         # Détection des valeurs aberrantes
-        Q1 = df.quantile(0.10, axis=1)
-        Q3 = df.quantile(0.90, axis=1)
+        Q1 = df.quantile(0.25, axis=1)  # Changement de seuil
+        Q3 = df.quantile(0.75, axis=1)  # Changement de seuil
         IQR = Q3 - Q1
         outliers_mask = (df.T < (Q1 - 1.5 * IQR)).T | (df.T > (Q3 + 1.5 * IQR)).T
 
@@ -89,4 +89,5 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     # Arrondi et conversion en int après interpolation
     data_final = data_final.round().astype(pd.Int64Dtype())
 
+    # Le nettoyage est volontairement moins strict afin de conserver un peu de bruit naturel.
     return data_final

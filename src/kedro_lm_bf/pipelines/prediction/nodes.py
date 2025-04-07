@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_absolute_error, accuracy_score
+from sklearn.metrics import mean_absolute_error, r2_score
 
 def predict(x_val: pd.DataFrame, y_val: pd.DataFrame, trained_model) -> pd.DataFrame:
     """
-    Utilise le modèle entraîné pour prédire sur x_val, calcule le MAE moyen 
+    Utilise le modèle entraîné pour prédire sur x_val, calcule le MAE moyen et le score R² moyen
     sur chaque sortie et le pourcentage d'accuracy (comparaison des étiquettes),
     puis retourne un DataFrame combinant les valeurs réelles et prédites.
 
@@ -23,13 +23,9 @@ def predict(x_val: pd.DataFrame, y_val: pd.DataFrame, trained_model) -> pd.DataF
     # Ici, on calcule l'erreur absolue sur chaque élément et on en fait la moyenne globale
     mae_mean = np.mean(np.abs(y_val.values - predictions))
     print(f"Mean Absolute Error moyen: {mae_mean:.4f}")
-    
-    # Calcul de l'accuracy (pourcentage de bonnes prédictions)
-    # On convertit les sorties one-hot en étiquettes en prenant l'argmax sur l'axe des colonnes
-    y_true_labels = np.argmax(y_val.values, axis=1)
-    y_pred_labels = np.argmax(predictions, axis=1)
-    accuracy = accuracy_score(y_true_labels, y_pred_labels)
-    print(f"Accuracy: {accuracy*100:.2f}%")
+
+    r2_mean = r2_score(y_val.values, predictions)
+    print(f"R² Score moyen: {r2_mean:.4f}")
     
     # Construction d'un DataFrame résultat avec les vraies valeurs et les prédictions pour chaque sortie
     n_outputs = predictions.shape[1] if predictions.ndim == 2 else 1

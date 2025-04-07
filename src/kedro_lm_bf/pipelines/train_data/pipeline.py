@@ -14,18 +14,18 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
                 func=split_train_test,
                 inputs="test",
-                outputs=["X_train", "x_val", "X_test", "y_train", "y_val", "y_test", "shaped_data"],
+                outputs=["X_train", "X_val", "X_test", "y_train", "y_val", "y_test"],
                 name="train_test_split",
             ),
         node(
                 func=create_model,
-                inputs=["shaped_data","y_train"],
+                inputs=dict(input_shape="X_train", output_shape="y_train"),
                 outputs="model",
                 name="create_model",
             ),
         node(
                 func=train_model,
-                inputs=["model","X_train", "x_val", "y_train", "y_val"],
+                inputs=["model","X_train", "X_val", "y_train", "y_val"],
                 outputs="trained_model",
                 name="train_model",
             ),

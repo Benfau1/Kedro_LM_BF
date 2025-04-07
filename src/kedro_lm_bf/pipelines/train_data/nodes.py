@@ -39,10 +39,7 @@ def split_train_test(transformed_data):
     X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.125, random_state=42)
 
-    before_columns_count = len([col for col in transformed_data.columns if col.startswith("before")])
-    shaped_data = pd.DataFrame([], columns=[before_columns_count, 1])
-
-    return X_train, X_val, X_test, y_train, y_val, y_test, shaped_data
+    return X_train, X_val, X_test, y_train, y_val, y_test
 
 
 def create_model(input_shape, 
@@ -53,6 +50,9 @@ def create_model(input_shape,
                  l2_value=1e-4, 
                  dropout_rate=0.3, 
                  learning_rate=1e-3):
+
+    if isinstance(output_shape, pd.DataFrame):
+        output_shape = output_shape.shape[1]
 
     inputs = layers.Input(shape=(7, 1))
 
@@ -79,10 +79,10 @@ def create_model(input_shape,
         metrics = ['accuracy']
     else:  # regression
         output_activation = 'linear'
-        loss = 'mse'
+        loss = 'mae'
         metrics = ['mae']
 
-    outputs = layers.Dense(output_shape.shape[1], activation=output_activation)(x)
+    outputs = layers.Dense(output_shape, activation=output_activation)(x)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
@@ -90,12 +90,12 @@ def create_model(input_shape,
 
     return model
 
-def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=50, batch_size=32, learning_rate=1e-3):
-    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=500, batch_size=32, learning_rate=1e-3):
+    early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
     reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3)
 
     ml_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-                     loss="mse", metrics=["mae"])
+                     loss="mae", metrics=["mae"])
 
     ml_model.fit(X_train, y_train,
                  epochs=epochs,
@@ -110,24 +110,10 @@ def compute_metrics(trained_model, X_test, y_test):
     # Prédictions sur les données de test
     y_pred = trained_model.predict(X_test)
     
-    # Pour accuracy et F1-score, tu dois t'assurer que y_test et y_pred sont des classes (non des valeurs continues)
-    # Si tu as un problème de classification, tu peux utiliser accuracy_score et f1_score
-    if len(y_test.shape) == 2:  # Cas de classification
-        y_test_classes = tf.argmax(y_test, axis=1).numpy()
-        y_pred_classes = tf.argmax(y_pred, axis=1).numpy()
-        accuracy = accuracy_score(y_test_classes, y_pred_classes)
-        f1 = f1_score(y_test_classes, y_pred_classes, average='weighted')
-        mae = mean_absolute_error(y_test, y_pred)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    else:  # Cas de régression, on n'a pas d'accuracy ou de F1-score
-        accuracy = None
-        f1 = None
-        mae = mean_absolute_error(y_test, y_pred)
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    mae = mean_absolute_error(y_test, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     
     metrics = {
-        "Accuracy": accuracy,
-        "F1-score": f1,
         "MAE": mae,
         "RMSE": rmse
     }
