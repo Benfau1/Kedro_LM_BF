@@ -81,7 +81,7 @@ X_max:
 
 # API
 train_api:
-  type: pandas.JSONDataSet
+  type: pandas.JSONDataset
   filepath: data/train_api.json
   save_args:
     orient: records
@@ -90,7 +90,7 @@ train_api:
     orient: records
 
 predict_api:
-  type: pandas.JSONDataSet
+  type: pandas.JSONDataset
   filepath: data/predict_api.json
   save_args:
     orient: records
