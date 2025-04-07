@@ -58,6 +58,9 @@ data_to_predict:
 predictions:
   type: pandas.CSVDataset
   filepath: data/predictions.csv
-test:
+y_min:
   type: pandas.CSVDataset
-  filepath: data/test.csv
+  filepath: data/y_min.csv
+y_max:
+  type: pandas.CSVDataset
+  filepath: data/y_max.csv

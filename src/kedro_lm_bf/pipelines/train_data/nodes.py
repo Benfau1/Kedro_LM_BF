@@ -37,12 +37,13 @@ def split_train_test(transformed_data):
 
     # 🔹 Normalisation des features uniquement
     X = min_max_normalize(X)
+    y = min_max_normalize(y)
 
     # Split Train / Test / Val
     X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.125, random_state=42)
 
-    return X_train, X_val, X_test, y_train, y_val, y_test
+    return X_train, X_val, X_test, y_train, y_val, y_test, y_min, y_max
 
 
 def create_model(input_shape, 
@@ -110,13 +111,18 @@ def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=500, batch_size
     return ml_model
 
 
-def compute_metrics(trained_model, X_test, y_test):
-    # Prédictions sur les données de test
+def compute_metrics(trained_model, X_test, y_test, y_min, y_max):
     y_pred = trained_model.predict(X_test)
-    
-    mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    
+
+    y_range = (y_max.values - y_min.values).reshape(1, -1)
+    y_min_values = y_min.values.reshape(1, -1)
+
+    y_pred_denorm = y_pred * y_range + y_min_values
+    y_test_denorm = y_test.values * y_range + y_min_values
+
+    mae = mean_absolute_error(y_test_denorm, y_pred_denorm)
+    r2 = r2_score(y_test_denorm, y_pred_denorm)
+
     metrics = {
         "MAE": mae,
         "R2": r2
