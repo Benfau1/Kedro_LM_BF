@@ -3,7 +3,7 @@ import tensorflow as tf
 from keras import layers, regularizers
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, accuracy_score, mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, r2_score
 import mlflow
 
 mlflow.autolog()
@@ -31,6 +31,9 @@ def split_train_test(transformed_data):
     # Séparer les features (X) et les labels (y)
     X = transformed_data[feature_columns]
     y = transformed_data[target_columns]
+
+    y_min = y.min()
+    y_max = y.max()
 
     # 🔹 Normalisation des features uniquement
     X = min_max_normalize(X)
@@ -90,6 +93,7 @@ def create_model(input_shape,
 
     return model
 
+
 def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=500, batch_size=32, learning_rate=1e-3):
     early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
     reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3)
@@ -111,11 +115,11 @@ def compute_metrics(trained_model, X_test, y_test):
     y_pred = trained_model.predict(X_test)
     
     mae = mean_absolute_error(y_test, y_pred)
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    r2 = r2_score(y_test, y_pred)
     
     metrics = {
         "MAE": mae,
-        "RMSE": rmse
+        "R2": r2
     }
 
     return pd.DataFrame(metrics, index=[0])

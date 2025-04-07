@@ -6,14 +6,8 @@ from .nodes import compute_metrics, create_model, min_max_normalize, split_train
 def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([
         node(
-                func=min_max_normalize,
-                inputs="cleaned_data_final",
-                outputs="test",
-                name="min_max_normalize",
-            ),
-        node(
                 func=split_train_test,
-                inputs="test",
+                inputs="cleaned_data_final",
                 outputs=["X_train", "X_val", "X_test", "y_train", "y_val", "y_test"],
                 name="train_test_split",
             ),
