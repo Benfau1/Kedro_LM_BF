@@ -35,7 +35,7 @@ def split_train_test(transformed_data):
     y_min = y.min()
     y_max = y.max()
 
-    # 🔹 Normalisation des features uniquement
+    # Normalisation des features uniquement
     X = min_max_normalize(X)
     y = min_max_normalize(y)
 
