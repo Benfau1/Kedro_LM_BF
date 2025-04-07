@@ -5,7 +5,7 @@ def create_pipeline(**kwargs) -> Pipeline:
     return pipeline([
         node(
             func=predict,
-            inputs=["x_val", "y_val", "trained_model"],
+            inputs=["x_val", "y_val", "trained_model", "y_min", "y_max"],
             outputs="predictions",
             name="predict_node",
         ),

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error, r2_score
 
-def predict(x_val: pd.DataFrame, y_val: pd.DataFrame, trained_model) -> pd.DataFrame:
+def predict(x_val: pd.DataFrame, y_val: pd.DataFrame, trained_model, y_min, y_max) -> pd.DataFrame:
     """
     Utilise le modèle entraîné pour prédire sur x_val, calcule le MAE moyen et le score R² moyen
     sur chaque sortie et le pourcentage d'accuracy (comparaison des étiquettes),
@@ -17,7 +17,12 @@ def predict(x_val: pd.DataFrame, y_val: pd.DataFrame, trained_model) -> pd.DataF
         pd.DataFrame: DataFrame combinant "y_true" et "y_pred" pour chaque sortie.
     """
     # Prédire avec le modèle
-    predictions = trained_model.predict(x_val)
+    predictions_norm = trained_model.predict(x_val)
+    # Convertir en array avec forme (1, -1) pour broadcast
+    y_range = (y_max.values - y_min.values).reshape(1, -1)
+    y_min_values = y_min.values.reshape(1, -1)
+
+    predictions = predictions_norm * y_range + y_min_values
     
     # Calcul du MAE moyen sur toutes les sorties
     # Ici, on calcule l'erreur absolue sur chaque élément et on en fait la moyenne globale
