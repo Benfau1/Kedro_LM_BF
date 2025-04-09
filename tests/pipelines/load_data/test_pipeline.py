@@ -1,9 +1,7 @@
-"""
-This is a boilerplate test file for pipeline 'load_data'
-generated using Kedro 0.19.11.
-Please add your pipeline tests here.
+import pandas as pd
+from kedro_lm_bf.pipelines.load_data import nodes
 
-Kedro recommends using `pytest` framework, more info about it can be found
-in the official documentation:
-https://docs.pytest.org/en/latest/getting-started.html
-"""
+def test_generate_audiogram_data_returns_dataframe():
+    df = nodes.generate_audiogram_data()
+    assert isinstance(df, pd.DataFrame)
+    assert not df.empty

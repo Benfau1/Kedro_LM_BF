@@ -122,9 +122,11 @@ def compute_metrics(trained_model, X_test, y_test, y_min, y_max):
     mae = mean_absolute_error(y_test_denorm, y_pred_denorm)
     r2 = r2_score(y_test_denorm, y_pred_denorm)
 
-    metrics = {
-        "MAE": mae,
-        "R2": r2
-    }
+    print(f"\n Résultats des métriques :")
+    print(f"   ➤ MAE (Mean Absolute Error) : {mae:.4f}")
+    print(f"   ➤ R² (Score de détermination) : {r2:.4f}")
 
-    return pd.DataFrame(metrics, index=[0])
+    return pd.DataFrame({
+        "MAE": [mae],
+        "R2": [r2]
+    })
