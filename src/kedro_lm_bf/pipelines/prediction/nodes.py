@@ -3,14 +3,16 @@ import numpy as np
 from sklearn.metrics import r2_score
 
 
-def predict(x_val: pd.DataFrame, y_val, trained_model, X_min, X_max, y_min, y_max) :
-    # Prédiction
-    predictions_norm = trained_model.predict(x_val)
+def predict(data_to_predict: pd.DataFrame, trained_model) :
+    predictions = trained_model.predict(data_to_predict)
+    predictions_df = pd.DataFrame(predictions, 
+                                  columns=[
+                                      "after_exam_125_Hz",
+                                      "after_exam_250_Hz",
+                                      "after_exam_500_Hz",
+                                      "after_exam_1000_Hz",
+                                      "after_exam_2000_Hz",
+                                      "after_exam_4000_Hz",
+                                      "after_exam_8000_Hz"])
 
-    y_true_array = y_val.values.ravel()
-    y_pred_array = predictions_norm.ravel()
-
-    r2 = r2_score(y_true_array, y_pred_array)
-
-    print(f"R² score: {r2:.4f}")
-    return y_pred_array
+    return predictions_df

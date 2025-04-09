@@ -12,7 +12,7 @@ def create_pipeline(**kwargs) -> Pipeline:
         node(
                 func=clean_data,
                 inputs="intermediate_cleaned_data",
-                outputs="cleaned_data_final",
+                outputs="data_to_predict",
                 name="clean_data",
             )
     ])
