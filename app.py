@@ -1,18 +1,14 @@
-# app.py
 from pathlib import Path
-from flask import Flask, Request, request
+from flask import Flask, render_template, request, redirect, url_for
 from kedro.framework.startup import bootstrap_project
 from kedro.framework.session import KedroSession
 import pandas as pd
-from kedro.framework.startup import bootstrap_project
+import csv
 
 app = Flask(__name__)
 bootstrap_project(Path.cwd())
 
-import csv
-from flask import Request
-
-def save_from_post_request(request: Request, filepath: str):
+def save_from_post_request(request, filepath: str):
     try:
         data = request.get_json()
         if data is None:
@@ -34,31 +30,37 @@ def save_from_post_request(request: Request, filepath: str):
         print(f"Erreur lors de la sauvegarde des données : {e}")
         raise
 
-# Define Flask route for POST requests
-@app.route("/predict", methods=["POST"])
+@app.route("/", methods=["GET"])
+def index():
+    return render_template('index.html')
+
+@app.route("/predict", methods=["GET", "POST"])
 def predict():
-    filepath = "data/generated_csv.csv"
-    save_from_post_request(request, filepath)
+    if request.method == "POST":
+        file = request.files['file']
+        filepath = "data/generated_csv.csv"
+        file.save(filepath)
 
-    run_pipelines(["transform_data","prediction"])
+        run_pipelines(["transform_data", "prediction"])
 
-    output = pd.read_csv(filepath)
-    return output.to_json(orient='records')
+        output = pd.read_csv(filepath)
+        return render_template('predict.html', tables=[output.to_html(classes='data')])
 
+    return render_template('predict.html')
 
-@app.route("/train", methods=["POST"])
+@app.route("/train", methods=["GET", "POST"])
 def train():
-    filepath = "data/generated_csv.csv"
-    save_from_post_request(request, filepath)
+    if request.method == "POST":
+        file = request.files['file']
+        filepath = "data/generated_csv.csv"
+        file.save(filepath)
 
-    run_pipelines(["transform_data","train_data"])
+        run_pipelines(["transform_data", "train_data"])
 
-    output = pd.read_csv(filepath)
-    return output.to_json(orient='records')
+        output = pd.read_csv(filepath)
+        return render_template('train.html', tables=[output.to_html(classes='data')])
 
-@app.route("/", methods=["POST","GET"])
-def default():
-    return
+    return render_template('train.html')
 
 def run_pipelines(pipelines):
     for pipeline_name in pipelines:

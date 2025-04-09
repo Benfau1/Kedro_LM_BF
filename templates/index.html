@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Kedro Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Bienvenue sur l'interface Kedro Flask</h1>
+    <ul>
+        <li><a href="{{ url_for('train') }}">Entraîner un modèle</a></li>
+        <li><a href="{{ url_for('predict') }}">Faire des prédictions</a></li>
+    </ul>
+</body>
+</html>
