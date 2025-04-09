@@ -13,4 +13,4 @@ def predict(x_val: pd.DataFrame, y_val, trained_model, X_min, X_max, y_min, y_ma
     r2 = r2_score(y_true_array, y_pred_array)
 
     print(f"R² score: {r2:.4f}")
-    return
+    return y_pred_array

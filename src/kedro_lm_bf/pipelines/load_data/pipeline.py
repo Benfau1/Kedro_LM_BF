@@ -8,16 +8,5 @@ def create_pipeline(**kwargs) -> Pipeline:
                 func=generate_audiogram_data, 
                 inputs=None, 
                 outputs="generated_csv", 
-                name="generate_audiogram_data"),
-        node(
-                func=replace_alphanumeric_values, 
-                inputs="generated_csv", 
-                outputs="intermediate_cleaned_data", 
-                name="replace_alphanumeric_values"),
-        node(
-                func=clean_data,
-                inputs="intermediate_cleaned_data",
-                outputs="cleaned_data_final",
-                name="clean_data",
-            ),
+                name="generate_audiogram_data")
     ])
