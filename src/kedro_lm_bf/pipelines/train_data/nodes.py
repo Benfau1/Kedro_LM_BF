@@ -40,7 +40,7 @@ def split_train_test(transformed_data):
 
     # Split Train / Test / Val
     X_temp, X_test, y_temp, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.125, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X_temp, y_temp, test_size=0.15, random_state=42)
 
     return X_train, X_val, X_test, y_train, y_val, y_test, y_min, y_max, X_min, X_max
 
@@ -48,11 +48,11 @@ def split_train_test(transformed_data):
 def create_model(input_shape, 
                  output_shape, 
                  task_type='regression',  # 'classification' ou 'regression'
-                 units=256, 
+                 units=512, 
                  activation='relu', 
                  l2_value=1e-4, 
-                 dropout_rate=0.3, 
-                 learning_rate=1e-3):
+                 dropout_rate=0.2, 
+                 learning_rate=1e-4):
 
     if isinstance(output_shape, pd.DataFrame):
         output_shape = output_shape.shape[1]
@@ -125,6 +125,9 @@ def compute_metrics(trained_model, X_test, y_test, y_min, y_max):
     print(f"\n Résultats des métriques :")
     print(f"   ➤ MAE (Mean Absolute Error) : {mae:.4f}")
     print(f"   ➤ R² (Score de détermination) : {r2:.4f}")
+
+    mlflow.log_metric("MAE", mae)
+    mlflow.log_metric("R2", r2)
 
     return pd.DataFrame({
         "MAE": [mae],
