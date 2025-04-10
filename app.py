@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 from kedro.framework.startup import bootstrap_project
 from kedro.framework.session import KedroSession
 import pandas as pd
@@ -43,8 +43,8 @@ def predict():
 
         run_pipelines(["transform_data", "prediction"])
 
-        output = pd.read_csv(filepath)
-        return render_template('predict.html', tables=[output.to_html(classes='data')])
+        output = pd.read_csv("data/predictions.csv")
+        return render_template('predict.html', tables=output.to_html(classes='data', index=False))
 
     return render_template('predict.html')
 
@@ -58,7 +58,8 @@ def train():
         run_pipelines(["transform_data", "train_data"])
 
         output = pd.read_csv(filepath)
-        return render_template('train.html', tables=[output.to_html(classes='data')])
+        html_table = output.to_html(classes='data', index=False).replace("\n", "")
+        return render_template('train.html', tables=html_table)
 
     return render_template('train.html')
 

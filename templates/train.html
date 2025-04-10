@@ -16,7 +16,7 @@
 
     {% if tables %}
         <h2>Résultat de l'entraînement :</h2>
-        <div>{{ tables|safe }}</div>
+        <div>{{ tables | safe }}</div>
     {% endif %}
     <br><br>
     <a href="{{ url_for('index') }}">Retour à l'accueil</a>

@@ -15,4 +15,4 @@ def predict(data_to_predict: pd.DataFrame, trained_model) :
                                       "after_exam_4000_Hz",
                                       "after_exam_8000_Hz"])
 
-    return predictions_df
+    return pd.concat([data_to_predict, predictions_df], axis=1)
