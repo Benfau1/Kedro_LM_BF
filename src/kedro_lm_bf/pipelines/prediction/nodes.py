@@ -16,5 +16,8 @@ def predict(data_to_predict: pd.DataFrame, X_min: pd.Series, X_max: pd.Series, t
     # Faire la prédiction avec le modèle
     predictions = trained_model.predict(X_norm)
 
-    # Retourner les prédictions sous forme de DataFrame
-    return pd.DataFrame(predictions)
+    # Dénormaliser les prédictions
+    predictions_denorm = predictions * (X_max.values.reshape(1, -1) - X_min.values.reshape(1, -1)) + X_min.values.reshape(1, -1)
+
+    # Retourner les prédictions dénormalisées sous forme de DataFrame
+    return pd.DataFrame(predictions_denorm)
