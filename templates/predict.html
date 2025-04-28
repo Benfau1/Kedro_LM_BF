@@ -1,16 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faire des Prédictions</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function toggleInput() {
+            var csvOption = document.getElementById('csvOption').checked;
+            document.getElementById('csvInput').style.display = csvOption ? 'block' : 'none';
+            document.getElementById('jsonInput').style.display = csvOption ? 'none' : 'block';
+        }
+    </script>
 </head>
 <body>
     <h1>Faire des Prédictions</h1>
+
     <form method="POST" enctype="multipart/form-data">
-        <label for="file">Téléchargez un fichier CSV :</label>
-        <input type="file" name="file" id="file" required>
+        <label>Choisissez le type d'entrée :</label><br>
+        <div class="radio-group">
+            <input type="radio" id="csvOption" name="inputType" value="csv" checked onclick="toggleInput()"> Fichier CSV
+            <input type="radio" id="jsonOption" name="inputType" value="json" onclick="toggleInput()"> Texte JSON
+        </div>
+        <br><br>
+
+        <div id="csvInput">
+            <label for="file">Téléchargez un fichier CSV :</label>
+            <input type="file" name="file" id="file">
+        </div>
+
+        <div id="jsonInput" style="display:none;">
+            <label for="json">Entrez votre JSON :</label><br>
+            <textarea name="json" id="json" rows="10" cols="50" placeholder='{"key": "value"}'></textarea>
+        </div>
+        
+        <br>
+
         <button type="submit">Envoyer</button>
     </form>
 

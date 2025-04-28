@@ -8,28 +8,6 @@ import csv
 app = Flask(__name__)
 bootstrap_project(Path.cwd())
 
-def save_from_post_request(request, filepath: str):
-    try:
-        data = request.get_json()
-        if data is None:
-            raise ValueError("Aucune donnée JSON reçue.")
-
-        if not isinstance(data, list):
-            data = [data]
-
-        fieldnames = data[0].keys()
-
-        with open(filepath, 'w', encoding='utf-8', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(data)
-
-        print(f"Données sauvegardées en CSV dans {filepath}")
-
-    except Exception as e:
-        print(f"Erreur lors de la sauvegarde des données : {e}")
-        raise
-
 @app.route("/", methods=["GET"])
 def index():
     return render_template('index.html')
@@ -37,23 +15,64 @@ def index():
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
     if request.method == "POST":
-        file = request.files['file']
-        filepath = "data/generated_csv.csv"
-        file.save(filepath)
+        input_type = request.form.get('inputType')
 
+        filepath = "data/generated_csv.csv"
+
+        if input_type == "csv":
+            file = request.files.get('file')
+            if file and file.filename != '':
+                file.save(filepath)
+            else:
+                return "Aucun fichier CSV envoyé.", 400
+
+        elif input_type == "json":
+            json_text = request.form.get('json')
+            if json_text:
+                try:
+                    data = pd.read_json(json_text)
+                    data.to_csv(filepath, index=False)
+                except ValueError as e:
+                    return f"Erreur de parsing JSON : {e}", 400
+            else:
+                return "Aucun JSON envoyé.", 400
+
+        else:
+            return "Type d'entrée non reconnu.", 400
+
+        # Lancer les pipelines
         run_pipelines(["transform_data", "prediction"])
 
+        # Lire le résultat
         output = pd.read_csv("data/predictions.csv")
         return render_template('predict.html', tables=output.to_html(classes='data', index=False))
 
     return render_template('predict.html')
 
+
 @app.route("/train", methods=["GET", "POST"])
 def train():
     if request.method == "POST":
-        file = request.files['file']
+        input_type = request.form.get('inputType')
         filepath = "data/generated_csv.csv"
-        file.save(filepath)
+
+        if input_type == "csv":
+            file = request.files.get('file')
+            if file and file.filename != '':
+                file.save(filepath)
+            else:
+                return "Aucun fichier CSV envoyé.", 400
+
+        elif input_type == "json":
+            json_text = request.form.get('json')
+            if json_text:
+                try:
+                    data = pd.read_json(json_text)
+                    data.to_csv(filepath, index=False)
+                except ValueError as e:
+                    return f"Erreur de parsing JSON : {e}", 400
+            else:
+                return "Aucun JSON envoyé.", 400
 
         run_pipelines(["transform_data", "train_data"])
 
