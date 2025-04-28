@@ -1,29 +1,20 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import r2_score
 
+def predict(data_to_predict: pd.DataFrame, X_min: pd.Series, X_max: pd.Series, trained_model):
 
-def predict(data_to_predict: pd.DataFrame, trained_model):
-    # Ne garder que les colonnes "before"
+    # Séparer les colonnes "before" et "after"
     before_columns = [col for col in data_to_predict.columns if "before" in col]
-    x_to_predict = data_to_predict[before_columns]
 
-    # Adapter la forme pour le modèle
-    x_to_predict = np.expand_dims(x_to_predict.values, axis=-1)
+    # On garde uniquement les colonnes "before" pour la prédiction
+    X_to_predict = data_to_predict[before_columns].copy()
 
-    # Faire la prédiction
-    predictions = trained_model.predict(x_to_predict)
+    # Normaliser X à prédire
+    X_norm = (X_to_predict.values - X_min.values.reshape(1, -1)) / (X_max.values.reshape(1, -1) - X_min.values.reshape(1, -1))
+    X_norm = X_norm.reshape(X_norm.shape[0], X_norm.shape[1], 1)
 
-    # Créer un DataFrame pour les prédictions
-    predictions_df = pd.DataFrame(predictions, 
-                                  columns=[
-                                      "after_exam_125_Hz",
-                                      "after_exam_250_Hz",
-                                      "after_exam_500_Hz",
-                                      "after_exam_1000_Hz",
-                                      "after_exam_2000_Hz",
-                                      "after_exam_4000_Hz",
-                                      "after_exam_8000_Hz"])
+    # Faire la prédiction avec le modèle
+    predictions = trained_model.predict(X_norm)
 
-    # Retourner les données originales + les prédictions
-    return pd.concat([data_to_predict, predictions_df], axis=1)
+    # Retourner les prédictions sous forme de DataFrame
+    return pd.DataFrame(predictions)

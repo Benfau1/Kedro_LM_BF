@@ -94,7 +94,7 @@ def create_model(input_shape,
     return model
 
 
-def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=50, batch_size=32, learning_rate=1e-3):
+def train_model(ml_model, X_train, X_val, y_train, y_val, epochs=90, batch_size=32, learning_rate=1e-3):
     early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True)
     reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3)
 
