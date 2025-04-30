@@ -4,75 +4,94 @@
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://docs.kedro.org/en/stable/data/data_catalog.html
 
+## Dataset contenant les audiogrammes générés automatiquement au début du pipeline
 generated_csv:
   type: pandas.CSVDataset
   filepath: data/generated_csv.csv
   fs_args:
     open_args_write:
       mode: "w"
+## Données nettoyées après suppression/traitement des valeurs alphanumériques
 intermediate_cleaned_data:
   type: pandas.CSVDataset
   filepath: data/intermediate_cleaned_data.csv
   fs_args:
     open_args_write:
       mode: "w"
+## Données finales nettoyées prêtes à être utilisées pour le traitement
 cleaned_data_final:
   type: pandas.CSVDataset
   filepath: data/cleaned_data_final.csv
   fs_args:
     open_args_write:
       mode: "w"
+## Données après shaping pour préparation à l'entraînement
 shaped_data:
   type: pandas.CSVDataset
   filepath: data/shaped_data.csv
+## Données d'entraînement pour les features (X)
 X_train:
   type: pandas.CSVDataset
   filepath: data/train_data.csv
+## Données d'entraînement pour les cibles (y)
 y_train:
   type: pandas.CSVDataset
   filepath: data/train_labels.csv
+## Données de validation pour les features (X)
 x_val:
   type: pandas.CSVDataset
   filepath: data/x_val.csv
+## Données de validation pour les cibles (y)
 y_val:
   type: pandas.CSVDataset
   filepath: data/y_val.csv
+## Données de test pour les features (X)
 X_test:
   type: pandas.CSVDataset
   filepath: data/test_data.csv
+## Données de test pour les cibles (y)
 y_test:
   type: pandas.CSVDataset
   filepath: data/test_labels.csv
+## Modèle non encore entraîné (initialisé)
 model:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/model.h5
+## Modèle entraîné et sauvegardé
 trained_model:
   type: tensorflow.TensorFlowModelDataset
   filepath: data/trained_model.h5
+## Résultats des métriques (ex. MAE, R²) après évaluation du modèle
 metrics:
   type: pandas.CSVDataset
   filepath: data/metrics.csv
+## Données utilisées pour faire les prédictions avec le modèle entraîné
 data_to_predict:
   type: pandas.CSVDataset
   filepath: data/data_to_predict.csv
+## Résultats des prédictions
 predictions:
   type: pandas.CSVDataset
   filepath: data/predictions.csv
+## Valeurs minimales de y (pour dénormalisation)
 y_min:
   type: pandas.CSVDataset
   filepath: data/y_min.csv
   save_args:
     index: False
+## Valeurs maximales de y (pour dénormalisation)
 y_max:
   type: pandas.CSVDataset
   filepath: data/y_max.csv
   save_args:
     index: False
+## Valeurs minimales de X (pour dénormalisation)
 X_min:
   type: pandas.CSVDataset
   filepath: data/X_min.csv
   save_args:
     index: False
+## Valeurs maximales de X (pour dénormalisation)
 X_max:
   type: pandas.CSVDataset
   filepath: data/X_max.csv

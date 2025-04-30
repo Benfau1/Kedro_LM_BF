@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Définition du type de document et configuration de l'encodage -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entraîner un Modèle</title>
+
+    <!-- Lien vers le fichier de style CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <!-- Script JavaScript permettant d'afficher dynamiquement soit le champ CSV soit JSON -->
     <script>
         function toggleInput() {
             var csvOption = document.getElementById('csvOption').checked;
@@ -14,8 +19,12 @@
     </script>
 </head>
 <body>
+    <!-- Titre principal de la page -->
     <h1>Entraîner un Modèle</h1>
+
+    <!-- Formulaire d'envoi de données, méthode POST et multipart pour permettre l'envoi de fichiers -->
     <form method="POST" enctype="multipart/form-data">
+        <!-- Choix entre un fichier CSV ou un texte JSON -->
         <label>Choisissez le type d'entrée :</label><br>
         <div class="radio-group">
             <input type="radio" id="csvOption" name="inputType" value="csv" checked onclick="toggleInput()"> Fichier CSV
@@ -23,11 +32,13 @@
         </div>
         <br><br>
 
+        <!-- Champ pour téléverser un fichier CSV (visible par défaut) -->
         <div id="csvInput">
             <label for="file">Téléchargez un fichier CSV :</label>
             <input type="file" name="file" id="file">
         </div>
 
+        <!-- Champ pour saisir directement des données au format JSON (caché par défaut) -->
         <div id="jsonInput" style="display:none;">
             <label for="json">Entrez votre JSON :</label><br>
             <textarea name="json" id="json" rows="10" cols="50" placeholder='{"key": "value"}'></textarea>
@@ -35,14 +46,18 @@
         
         <br>
 
+        <!-- Bouton de soumission du formulaire -->
         <button type="submit">Envoyer</button>
     </form>
 
+    <!-- Affichage des résultats après traitement si des données sont retournées -->
     {% if tables %}
         <h2>Résultat de l'entraînement :</h2>
         <div>{{ tables | safe }}</div>
     {% endif %}
+
     <br><br>
+    <!-- Lien pour revenir à la page principale -->
     <a href="{{ url_for('index') }}">Retour à l'accueil</a>
 </body>
 </html>

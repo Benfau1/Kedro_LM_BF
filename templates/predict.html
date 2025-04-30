@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <!-- Définition de l'encodage et de la taille de la fenêtre pour la compatibilité mobile -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faire des Prédictions</title>
+
+    <!-- Lien vers le fichier CSS pour le style de la page -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <!-- Script JavaScript pour afficher l'un des deux formulaires en fonction du choix (CSV ou JSON) -->
     <script>
         function toggleInput() {
             var csvOption = document.getElementById('csvOption').checked;
@@ -14,9 +19,12 @@
     </script>
 </head>
 <body>
+    <!-- Titre principal de la page -->
     <h1>Faire des Prédictions</h1>
 
+    <!-- Formulaire pour soumettre un fichier ou du texte JSON -->
     <form method="POST" enctype="multipart/form-data">
+        <!-- Choix entre deux types d'entrée : CSV ou JSON -->
         <label>Choisissez le type d'entrée :</label><br>
         <div class="radio-group">
             <input type="radio" id="csvOption" name="inputType" value="csv" checked onclick="toggleInput()"> Fichier CSV
@@ -24,11 +32,13 @@
         </div>
         <br><br>
 
+        <!-- Champ pour téléverser un fichier CSV (affiché par défaut) -->
         <div id="csvInput">
             <label for="file">Téléchargez un fichier CSV :</label>
             <input type="file" name="file" id="file">
         </div>
 
+        <!-- Champ pour entrer un texte JSON (caché par défaut) -->
         <div id="jsonInput" style="display:none;">
             <label for="json">Entrez votre JSON :</label><br>
             <textarea name="json" id="json" rows="10" cols="50" placeholder='{"key": "value"}'></textarea>
@@ -36,14 +46,18 @@
         
         <br>
 
+        <!-- Bouton pour soumettre le formulaire -->
         <button type="submit">Envoyer</button>
     </form>
 
+    <!-- Affichage des résultats des prédictions si elles existent -->
     {% if tables %}
         <h2>Résultat des prédictions :</h2>
         <div>{{ tables|safe }}</div>
     {% endif %}
+
     <br><br>
+    <!-- Lien pour revenir à la page d'accueil -->
     <a href="{{ url_for('index') }}">Retour à l'accueil</a>
 </body>
 </html>

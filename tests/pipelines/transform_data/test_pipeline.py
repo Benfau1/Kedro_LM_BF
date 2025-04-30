@@ -1,8 +1,13 @@
+# Tests unitaires pour les fonctions de nettoyage de données dans la pipeline `transform_data`.
+# Chaque test vérifie que les fonctions gèrent correctement les cas attendus (valeurs alphanumériques, outliers, etc.).
+
 import pandas as pd
 import numpy as np
 from kedro_lm_bf.pipelines.transform_data import nodes
 
 
+# Ce test vérifie que la fonction remplace bien les lettres et valeurs manquantes,
+# et que le DataFrame résultant ne contient plus de NaN, tout en restant de type entier.
 def test_replace_alphanumeric_values_handles_letters_and_floats():
     df = pd.DataFrame({
         "before_1": [32, "X", 40],
@@ -30,6 +35,8 @@ def test_replace_alphanumeric_values_handles_letters_and_floats():
     assert result.dtypes.unique()[0] == pd.Int64Dtype(), "Le type n'est pas Int64"
 
 
+# Ce test s'assure que les valeurs aberrantes (ex: 1000, 9999) sont bien détectées et remplacées,
+# et que l'interpolation est correcte.
 def test_clean_data_removes_outliers_and_interpolates():
     df = pd.DataFrame({
         "before_1": [32, 1000, 40],
@@ -58,6 +65,7 @@ def test_clean_data_removes_outliers_and_interpolates():
     assert result.loc[2, "after_5"] != 9999, "Outlier non nettoyé (after_5)"
 
 
+# Ce test vérifie que la forme du DataFrame est bien conservée après le nettoyage.
 def test_clean_data_preserves_shape():
     df = pd.DataFrame({
         f"before_{i+1}": [i, i+1, i+2] for i in range(7)
@@ -69,6 +77,7 @@ def test_clean_data_preserves_shape():
     assert result.shape == df.shape, "La forme du DataFrame a été modifiée"
 
 
+# Ce test s'assure que l'ordre des colonnes n'est pas modifié par la fonction de remplacement.
 def test_replace_alphanumeric_values_preserves_order():
     df = pd.DataFrame({
         "before_1": [1, "X", 3],
@@ -91,6 +100,7 @@ def test_replace_alphanumeric_values_preserves_order():
     assert list(result.columns) == list(df.columns), "L'ordre des colonnes a changé"
 
 
+# Ce test vérifie que les valeurs finales après nettoyage sont bien dans un intervalle réaliste (entre 0 et 130).
 def test_values_within_realistic_range_after_cleaning():
     df = pd.DataFrame({
         "before_1": [0, 130, 999],
