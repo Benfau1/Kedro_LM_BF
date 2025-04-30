@@ -34,6 +34,7 @@ FROM runtime-environment
 ARG KEDRO_UID=999
 ARG KEDRO_GID=0
 COPY --chown=${KEDRO_UID}:${KEDRO_GID} . .
+RUN mkdir -p /home/kedro_docker/data
 
 # On expose le port 8888, utile si on lance un notebook ou une API
 EXPOSE 8888
