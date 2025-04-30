@@ -50,6 +50,16 @@
         <button type="submit">Envoyer</button>
     </form>
 
+    <!-- Affichage des erreurs si elles existent -->
+    {% if error_messages %}
+        <h2>Erreurs détectées :</h2>
+        <ul>
+            {% for message in error_messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <!-- Affichage des résultats des prédictions si elles existent -->
     {% if tables %}
         <h2>Résultat des prédictions :</h2>

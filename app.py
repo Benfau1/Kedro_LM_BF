@@ -36,7 +36,14 @@ def predict():
             if json_text:
                 try:
                     data = pd.read_json(json_text)  # Lecture du JSON sous forme de DataFrame
-                    data.to_csv(filepath, index=False)  # Enregistrement en CSV pour être utilisé dans Kedro
+                    missing_info = data[data.isnull().any(axis=1)]
+                    if not missing_info.empty:
+                        error_messages = []
+                        for i, row in missing_info.iterrows():
+                            missing_columns = row[row.isnull()].index.tolist()
+                            error_messages.append(f"Ligne {i+1} : colonnes manquantes -> {', '.join(missing_columns)}")
+                        return render_template('predict.html', error_messages=error_messages)
+                    data.to_csv(filepath, index=False)  # Enregistrement en CSV
                 except ValueError as e:
                     return f"Erreur de parsing JSON : {e}", 400
             else:
@@ -45,14 +52,26 @@ def predict():
         else:
             return "Type d'entrée non reconnu.", 400
 
+        try:
+            df = pd.read_csv(filepath)
+            missing_info = df[df.isnull().any(axis=1)]
+            if not missing_info.empty:
+                error_messages = []
+                for i, row in missing_info.iterrows():
+                    missing_columns = row[row.isnull()].index.tolist()
+                    error_messages.append(f"Ligne {i+1} : colonnes manquantes -> {', '.join(missing_columns)}")
+                return render_template('predict.html', error_messages=error_messages)
+        except Exception as e:
+            return f"Erreur lors de la vérification du fichier : {e}", 400
+
         # Exécution des pipelines transform_data (prétraitement) et prediction
         run_pipelines(["transform_data", "prediction"])
 
         # Lecture et affichage du fichier résultat (les prédictions)
         output = pd.read_csv("data/predictions.csv")
-        return render_template('predict.html', tables=output.to_html(classes='data', index=False))
+        return render_template('predict.html', tables=output.to_html(classes='data', index=False), error_messages=None)
 
-    return render_template('predict.html')
+    return render_template('predict.html', error_messages=None)
 
 # Route pour entraîner le modèle
 @app.route("/train", methods=["GET", "POST"])
