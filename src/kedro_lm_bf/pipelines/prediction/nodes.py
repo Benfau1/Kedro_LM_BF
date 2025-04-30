@@ -20,4 +20,4 @@ def predict(data_to_predict: pd.DataFrame, X_min: pd.Series, X_max: pd.Series, t
     predictions_denorm = predictions * (X_max.values.reshape(1, -1) - X_min.values.reshape(1, -1)) + X_min.values.reshape(1, -1)
 
     # Retourner les prédictions dénormalisées sous forme de DataFrame
-    return pd.DataFrame(predictions_denorm)
+    return pd.concat([data_to_predict, pd.DataFrame(predictions_denorm, columns=["after_exam_125_Hz","after_exam_250_Hz","after_exam_500_Hz","after_exam_1000_Hz","after_exam_2000_Hz","after_exam_4000_Hz","after_exam_8000_Hz"])])
