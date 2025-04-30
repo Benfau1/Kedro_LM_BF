@@ -89,6 +89,11 @@ def train():
 
     return render_template('train.html')
 
+@app.route('/generate-data')
+def generate_data():
+    run_pipelines(["load_data"])
+    return render_template('index.html', message="Données d'entraînement générées avec succès.")
+
 # Fonction pour exécuter une ou plusieurs pipelines Kedro
 def run_pipelines(pipelines):
     for pipeline_name in pipelines:

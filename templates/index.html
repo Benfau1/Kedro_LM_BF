@@ -9,8 +9,13 @@
 <body>
     <h1>Bienvenue sur l'interface Kedro Flask</h1>
     <ul>
+        <li><a href="{{ url_for('generate_data') }}">Générer des données d'entraînement</a></li>
         <li><a href="{{ url_for('train') }}">Entraîner un modèle</a></li>
         <li><a href="{{ url_for('predict') }}">Faire des prédictions</a></li>
     </ul>
+
+    {% if message %}
+        <h2 style="color:green">{{ message }}</h2>
+    {% endif %}
 </body>
 </html>
